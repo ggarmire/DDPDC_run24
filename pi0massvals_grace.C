@@ -56,9 +56,9 @@ void pi0massvals_grace(std::string infile, std::string  outfile)
     TH2F *h_pi0mass_bad = new TH2F("h_pi0mass_bad", "bins with pi0 mass greater than .3 or under .1", etabins, etamin, etamax, phibins, phimin, phimax);
     TH1F *h_pi0mass_distribution = new TH1F("h_pi0mass_distribution", "distribution of pi0 mass values from fits", 2500, -2.5, 2.5);
     TH2F *h_blockcount = new TH2F("h_pi0mass_blockcount", "should fill 1 time per block! ", etabins, etamin, etamax, phibins, phimin, phimax);
-    TH1F *h_badfitcounts_eta = new TH1F("h_failedfitcounts_eta", "# of bad fits in each eta bin; eta bin; count", etabins, etamin, etamax);
-    TH1F *h_badfitcounts_eta_conflated = new TH1F("h_failedfitcounts_eta_conflated", "# of bad fits across block in eta; eta bin; count", 16, etamin, phimax);
-    TH1F *h_badfitcounts_phi = new TH1F("h_failedfitcounts_phi", "# of bad fits in each phi bin; eta phi; count", phibins, phimin, phimax);
+    TH1F *h_badfitcounts_eta = new TH1F("h_badfitcounts_eta", "# of bad fits in each eta bin; eta bin; count", etabins, etamin, etamax);
+    TH1F *h_badfitcounts_eta_conflated = new TH1F("h_badfitcounts_eta_conflated", "# of bad fits across block in eta; eta bin; count", 16, etamin, phimax);
+    TH1F *h_badfitcounts_phi = new TH1F("h_badfitcounts_phi", "# of bad fits in each phi bin; eta phi; count", phibins, phimin, phimax);
     TH1F *h_pi0candidates_eta = new TH1F("h_pi0candidates_eta", "# of diphoton candidates in all fits in each eta bin; eta bin; pi0 candidates", etabins, etamin, etamax);
     TH1F *h_pi0candidates_phi = new TH1F("h_pi0candidates_phi", "# of diphoton candidates in all fits in each phi bin; phi bin; pi0 candidates", phibins, phimin, phimax);
 
@@ -97,9 +97,7 @@ void pi0massvals_grace(std::string infile, std::string  outfile)
     //fit the bin with justins fitting - fit h_pi0tofit, put the value in h_pi0mass_bybin
             if (h_pi0tofit->Integral()==0) continue;
             nfit ++;
-            TF1 *totalFit = new TF1("totalFit", "gaus(0) + pol2(3)", fitStart, fitEnd);
-            
-            
+            TF1 *totalFit = new TF1("totalFit", "gaus(0) + pol2(3)", fitStart, fitEnd);    
             
             double maxBinContent = h_pi0tofit->GetBinContent(h_pi0tofit->GetXaxis()->FindBin(0.15));
            // double maxBinCenter = h_pi0tofit->GetXaxis()->GetBinCenter(maxBin);                                                       
@@ -110,6 +108,19 @@ void pi0massvals_grace(std::string infile, std::string  outfile)
             //return fitResult;
             //if (fitResult == nullptr) continue;
             double fitMean = totalFit->GetParameter(1);
+
+            if (fitMean < 0.12 or fitMean > 0.18){
+
+                TF1 *totalFit = new TF1("totalFit", "gaus(0) + pol2(3)", 0.095, fitEnd);    
+                double maxBinContent = h_pi0tofit->GetBinContent(h_pi0tofit->GetXaxis()->FindBin(0.15));
+                totalFit->SetParameter(0, maxBinContent);                                                                   
+                totalFit->SetParameter(1, 0.15); //.15                                                               
+                totalFit->SetParameter(2, sigmaEstimate);
+                TFitResultPtr fitResult = h_pi0tofit->Fit("totalFit", "QSR+");
+                fitMean = totalFit->GetParameter(1);
+                cout << "bin: "<< iphi << ieta << " fitmean: "<< fitMean <<endl;
+
+            }
             double fitsig = totalFit->GetParameter(2);
             //double fitMeanError = totalFit->GetParError(1);
             //if (fitMean > 0 && fitMean < 0.7) i
@@ -127,7 +138,7 @@ void pi0massvals_grace(std::string infile, std::string  outfile)
             h_pi0candidates_eta->Fill(ieta, h_pi0tofit->Integral());
             h_pi0candidates_phi->Fill(iphi, h_pi0tofit->Integral());
             //if (fitMeanError)h_pi0mass_error->Fill(ieta, iphi, fitMeanError);
-            if (fitMean < 0.1 || fitMean > 0.3){ 
+            if (fitMean < 0.12 || fitMean > 0.18){ 
                 h_pi0mass_bad->Fill(ieta, iphi);
                 h_badfitcounts_eta->Fill(ieta);
                 h_badfitcounts_eta_conflated->Fill(ieta%16);
@@ -145,8 +156,10 @@ void pi0massvals_grace(std::string infile, std::string  outfile)
     
     for (int iphi = 0; iphi < 16; iphi++) {
         h_meanmass_phi->Fill(iphi, h_pi0mass_dist_byphibin[iphi]->GetMean());
-        h_meanmass_phi->SetBinError(h_pi0mass_dist_byphibin[iphi]->FindBin(iphi), (1/sqrt(768))*h_pi0mass_dist_byphibin[iphi]->GetStdDev());
+        double err = 1/sqrt(h_pi0mass_dist_byphibin[iphi]->GetEntries()) * h_pi0mass_dist_byphibin[iphi]->GetStdDev();
+        h_meanmass_phi->SetBinError(h_meanmass_phi->FindBin(iphi), err);
         //cout << "std for bin " << iphi << ": " << h_pi0mass_dist_byphibin[iphi]->GetStdDev()  << endl;
+        //cout << "error for bin " << iphi << ": " << err  << endl;
         //cout << iphi << endl;
        // cout << "overflow: " << h_pi0mass_dist_byphibin[iphi]->GetBinContent(0) << "+" << h_pi0mass_dist_byphibin[iphi]->GetBinContent(2001) << endl; 
     }
