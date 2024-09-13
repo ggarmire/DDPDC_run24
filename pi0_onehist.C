@@ -18,6 +18,9 @@
 #include <sys/stat.h>
 void pi0_onehist(string infile, int phibin, int etabin)
 {
+
+    ROOT::Math::MinimizerOptions::SetDefaultMinimizer("Minuit2");
+    ROOT::Math::MinimizerOptions::SetDefaultMaxFunctionCalls(5000);
 // files and trees in
     TFile *f = TFile::Open(infile.c_str());     // open the infile
 
@@ -35,9 +38,6 @@ void pi0_onehist(string infile, int phibin, int etabin)
     double fitStart = 0.1;
     double fitEnd = 0.4;
     double meanest = 0.15;
-
-    double lowerSignalBoundEstimate = 0.1;
-    double upperSignalBoundEstimate = 0.2;
 
     double sigmaEstimate = 0.025; // sigmaEstimate value
 
