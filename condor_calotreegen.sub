@@ -1,0 +1,9 @@
+executable              = condor_calotreegen.sh
+arguments               = 0 $(filename) 48899_full/segment_$(Process).root
+log                     = /tmp/condor-ggarmire-$(runnumber)-$(Process).log
+output                  = stdout/job-$(runnumber)-$(Process).out
+error                   = error/job-$(Process).err
+request_memory          = 4GB
+PeriodicHold=(NumJobStarts>=2 && JobStatus == 1)
+concurrency_limits=CONCURRENCY_LIMIT_DEFAULT:100
+queue filename from lists/dst_calo_run2pp-000$(runnumber).list

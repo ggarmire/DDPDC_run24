@@ -1,0 +1,9 @@
+executable              = condor_pi0_position.sh
+arguments               = $(filename) DDPDC_histograms/$(runnumber)/hist_$(Process).root 
+log                     = /tmp/condor-ggarmire-$(Process).log
+output                  = stdout/job-$(Process).out
+error                   = error/job-$(Process).err
+request_memory          = 4GB
+PeriodicHold=(NumJobStarts>=2 && JobStatus == 1)                                                                        
+concurrency_limits=CONCURRENCY_LIMIT_DEFAULT:100    
+queue filename from segment_lists/$(runnumber).list
