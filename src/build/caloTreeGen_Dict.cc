@@ -347,6 +347,7 @@ class TFile;
 class RawCluster;
 class TowerInfoContainer;
 class TH1F;
+class TH2F;
 
 class caloTreeGen : public SubsysReco
 {
@@ -402,6 +403,12 @@ class caloTreeGen : public SubsysReco
   void doTrig(int trigOn, std::string trigNode) {storeTrig = trigOn; m_trigNode = trigNode;}
 
  private:
+
+
+ // cut values
+  float clus1min = 1;         // min energy for leading cluster
+  float clus2min = 1;         // min energy for following cluster
+  float vertexcut = 20;     // max vertex is 20cm.
 
   TTree *T;
   //EMCal
@@ -483,7 +490,28 @@ class caloTreeGen : public SubsysReco
   //Fun4AllHistoManager *hm = nullptr;
   std::string Outfile = "commissioning.root";
 
+
+// histograms here
   TH1F *zVertex;
+  TH1F *h_etaTow;
+  TH1F *h_phiTow;
+  TH2F *h_position;
+  TH2F *h_position_clus;
+  TH1F *h_fullpi0;
+  TH2F *h_pi0[16]; 
+  TH2F *h_pi0_onblock[16]; 
+
+
+// other added variables
+  int phibin1, phibin2, etabin1, etabin2;
+
+  const int bins_etabin = 768;  
+  const float high_etabin = 767.5;
+  const float low_etabin = -0.5;
+  const int bins_pi0 = 100; 
+  const float high_pi0 = 1;
+  const float low_pi0 = 0.0;
+
   
   float getMaxTowerE(RawCluster *cluster, TowerInfoContainer *towerContainer);
   std::vector<float> returnClusterTowE(RawCluster *cluster, TowerInfoContainer *towerContainer);

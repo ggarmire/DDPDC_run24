@@ -251,8 +251,8 @@ caloTreeGen_Dict.lo: caloTreeGen_Dict.cc /usr/include/stdc-predef.h \
  /cvmfs/sphenix.sdcc.bnl.gov/gcc-12.1.0/opt/sphenix/core/gcc/12.1.0-57c96/x86_64-centos7/include/c++/12.1.0/bits/forward_list.tcc \
  /cvmfs/sphenix.sdcc.bnl.gov/gcc-12.1.0/opt/sphenix/core/root-6.26.06.p01/include/TDataMember.h \
  ../caloTreeGen.h \
- /cvmfs/sphenix.sdcc.bnl.gov/gcc-12.1.0/release/release_new/new.1/include/fun4all/SubsysReco.h \
- /cvmfs/sphenix.sdcc.bnl.gov/gcc-12.1.0/release/release_new/new.1/include/fun4all/Fun4AllBase.h \
+ /cvmfs/sphenix.sdcc.bnl.gov/gcc-12.1.0/release/release_new/new.4/include/fun4all/SubsysReco.h \
+ /cvmfs/sphenix.sdcc.bnl.gov/gcc-12.1.0/release/release_new/new.4/include/fun4all/Fun4AllBase.h \
  /cvmfs/sphenix.sdcc.bnl.gov/gcc-12.1.0/opt/sphenix/core/root-6.26.06.p01/include/TTree.h \
  /cvmfs/sphenix.sdcc.bnl.gov/gcc-12.1.0/opt/sphenix/core/root-6.26.06.p01/include/Compression.h \
  /cvmfs/sphenix.sdcc.bnl.gov/gcc-12.1.0/opt/sphenix/core/root-6.26.06.p01/include/ROOT/TIOFeatures.hxx \
@@ -267,10 +267,10 @@ caloTreeGen_Dict.lo: caloTreeGen_Dict.cc /usr/include/stdc-predef.h \
  /cvmfs/sphenix.sdcc.bnl.gov/gcc-12.1.0/opt/sphenix/core/root-6.26.06.p01/include/TBranch.h \
  /cvmfs/sphenix.sdcc.bnl.gov/gcc-12.1.0/opt/sphenix/core/root-6.26.06.p01/include/TBranchCacheInfo.h \
  /cvmfs/sphenix.sdcc.bnl.gov/gcc-12.1.0/opt/sphenix/core/root-6.26.06.p01/include/TBits.h \
- /cvmfs/sphenix.sdcc.bnl.gov/gcc-12.1.0/release/release_new/new.1/include/ffarawobjects/Gl1Packet.h \
- /cvmfs/sphenix.sdcc.bnl.gov/gcc-12.1.0/release/release_new/new.1/include/ffarawobjects/OfflinePacketv1.h \
- /cvmfs/sphenix.sdcc.bnl.gov/gcc-12.1.0/release/release_new/new.1/include/ffarawobjects/OfflinePacket.h \
- /cvmfs/sphenix.sdcc.bnl.gov/gcc-12.1.0/release/release_new/new.1/include/phool/PHObject.h \
+ /cvmfs/sphenix.sdcc.bnl.gov/gcc-12.1.0/release/release_new/new.4/include/ffarawobjects/Gl1Packet.h \
+ /cvmfs/sphenix.sdcc.bnl.gov/gcc-12.1.0/release/release_new/new.4/include/ffarawobjects/OfflinePacketv1.h \
+ /cvmfs/sphenix.sdcc.bnl.gov/gcc-12.1.0/release/release_new/new.4/include/ffarawobjects/OfflinePacket.h \
+ /cvmfs/sphenix.sdcc.bnl.gov/gcc-12.1.0/release/release_new/new.4/include/phool/PHObject.h \
  /cvmfs/sphenix.sdcc.bnl.gov/gcc-12.1.0/opt/sphenix/core/root-6.26.06.p01/include/TObject.h \
  /cvmfs/sphenix.sdcc.bnl.gov/gcc-12.1.0/opt/sphenix/core/gcc/12.1.0-57c96/x86_64-centos7/include/c++/12.1.0/iostream \
  /cvmfs/sphenix.sdcc.bnl.gov/gcc-12.1.0/opt/sphenix/core/gcc/12.1.0-57c96/x86_64-centos7/include/c++/12.1.0/ostream \
@@ -286,9 +286,9 @@ caloTreeGen_Dict.lo: caloTreeGen_Dict.cc /usr/include/stdc-predef.h \
  /cvmfs/sphenix.sdcc.bnl.gov/gcc-12.1.0/opt/sphenix/core/gcc/12.1.0-57c96/x86_64-centos7/include/c++/12.1.0/bits/ostream.tcc \
  /cvmfs/sphenix.sdcc.bnl.gov/gcc-12.1.0/opt/sphenix/core/gcc/12.1.0-57c96/x86_64-centos7/include/c++/12.1.0/istream \
  /cvmfs/sphenix.sdcc.bnl.gov/gcc-12.1.0/opt/sphenix/core/gcc/12.1.0-57c96/x86_64-centos7/include/c++/12.1.0/bits/istream.tcc \
- /cvmfs/sphenix.sdcc.bnl.gov/gcc-12.1.0/release/release_new/new.1/include/ffarawobjects/Gl1Packetv1.h \
- /cvmfs/sphenix.sdcc.bnl.gov/gcc-12.1.0/release/release_new/new.1/include/ffarawobjects/Gl1Packet.h \
- /cvmfs/sphenix.sdcc.bnl.gov/gcc-12.1.0/release/release_new/new.1/include/ffarawobjects/Gl1Packetv2.h
+ /cvmfs/sphenix.sdcc.bnl.gov/gcc-12.1.0/release/release_new/new.4/include/ffarawobjects/Gl1Packetv1.h \
+ /cvmfs/sphenix.sdcc.bnl.gov/gcc-12.1.0/release/release_new/new.4/include/ffarawobjects/Gl1Packet.h \
+ /cvmfs/sphenix.sdcc.bnl.gov/gcc-12.1.0/release/release_new/new.4/include/ffarawobjects/Gl1Packetv2.h
 /usr/include/stdc-predef.h:
 /cvmfs/sphenix.sdcc.bnl.gov/gcc-12.1.0/opt/sphenix/core/gcc/12.1.0-57c96/x86_64-centos7/lib/gcc/x86_64-pc-linux-gnu/12.1.0/include/stddef.h:
 /usr/include/stdio.h:
@@ -573,8 +573,8 @@ caloTreeGen_Dict.lo: caloTreeGen_Dict.cc /usr/include/stdc-predef.h \
 /cvmfs/sphenix.sdcc.bnl.gov/gcc-12.1.0/opt/sphenix/core/gcc/12.1.0-57c96/x86_64-centos7/include/c++/12.1.0/bits/forward_list.tcc:
 /cvmfs/sphenix.sdcc.bnl.gov/gcc-12.1.0/opt/sphenix/core/root-6.26.06.p01/include/TDataMember.h:
 ../caloTreeGen.h:
-/cvmfs/sphenix.sdcc.bnl.gov/gcc-12.1.0/release/release_new/new.1/include/fun4all/SubsysReco.h:
-/cvmfs/sphenix.sdcc.bnl.gov/gcc-12.1.0/release/release_new/new.1/include/fun4all/Fun4AllBase.h:
+/cvmfs/sphenix.sdcc.bnl.gov/gcc-12.1.0/release/release_new/new.4/include/fun4all/SubsysReco.h:
+/cvmfs/sphenix.sdcc.bnl.gov/gcc-12.1.0/release/release_new/new.4/include/fun4all/Fun4AllBase.h:
 /cvmfs/sphenix.sdcc.bnl.gov/gcc-12.1.0/opt/sphenix/core/root-6.26.06.p01/include/TTree.h:
 /cvmfs/sphenix.sdcc.bnl.gov/gcc-12.1.0/opt/sphenix/core/root-6.26.06.p01/include/Compression.h:
 /cvmfs/sphenix.sdcc.bnl.gov/gcc-12.1.0/opt/sphenix/core/root-6.26.06.p01/include/ROOT/TIOFeatures.hxx:
@@ -589,10 +589,10 @@ caloTreeGen_Dict.lo: caloTreeGen_Dict.cc /usr/include/stdc-predef.h \
 /cvmfs/sphenix.sdcc.bnl.gov/gcc-12.1.0/opt/sphenix/core/root-6.26.06.p01/include/TBranch.h:
 /cvmfs/sphenix.sdcc.bnl.gov/gcc-12.1.0/opt/sphenix/core/root-6.26.06.p01/include/TBranchCacheInfo.h:
 /cvmfs/sphenix.sdcc.bnl.gov/gcc-12.1.0/opt/sphenix/core/root-6.26.06.p01/include/TBits.h:
-/cvmfs/sphenix.sdcc.bnl.gov/gcc-12.1.0/release/release_new/new.1/include/ffarawobjects/Gl1Packet.h:
-/cvmfs/sphenix.sdcc.bnl.gov/gcc-12.1.0/release/release_new/new.1/include/ffarawobjects/OfflinePacketv1.h:
-/cvmfs/sphenix.sdcc.bnl.gov/gcc-12.1.0/release/release_new/new.1/include/ffarawobjects/OfflinePacket.h:
-/cvmfs/sphenix.sdcc.bnl.gov/gcc-12.1.0/release/release_new/new.1/include/phool/PHObject.h:
+/cvmfs/sphenix.sdcc.bnl.gov/gcc-12.1.0/release/release_new/new.4/include/ffarawobjects/Gl1Packet.h:
+/cvmfs/sphenix.sdcc.bnl.gov/gcc-12.1.0/release/release_new/new.4/include/ffarawobjects/OfflinePacketv1.h:
+/cvmfs/sphenix.sdcc.bnl.gov/gcc-12.1.0/release/release_new/new.4/include/ffarawobjects/OfflinePacket.h:
+/cvmfs/sphenix.sdcc.bnl.gov/gcc-12.1.0/release/release_new/new.4/include/phool/PHObject.h:
 /cvmfs/sphenix.sdcc.bnl.gov/gcc-12.1.0/opt/sphenix/core/root-6.26.06.p01/include/TObject.h:
 /cvmfs/sphenix.sdcc.bnl.gov/gcc-12.1.0/opt/sphenix/core/gcc/12.1.0-57c96/x86_64-centos7/include/c++/12.1.0/iostream:
 /cvmfs/sphenix.sdcc.bnl.gov/gcc-12.1.0/opt/sphenix/core/gcc/12.1.0-57c96/x86_64-centos7/include/c++/12.1.0/ostream:
@@ -608,6 +608,6 @@ caloTreeGen_Dict.lo: caloTreeGen_Dict.cc /usr/include/stdc-predef.h \
 /cvmfs/sphenix.sdcc.bnl.gov/gcc-12.1.0/opt/sphenix/core/gcc/12.1.0-57c96/x86_64-centos7/include/c++/12.1.0/bits/ostream.tcc:
 /cvmfs/sphenix.sdcc.bnl.gov/gcc-12.1.0/opt/sphenix/core/gcc/12.1.0-57c96/x86_64-centos7/include/c++/12.1.0/istream:
 /cvmfs/sphenix.sdcc.bnl.gov/gcc-12.1.0/opt/sphenix/core/gcc/12.1.0-57c96/x86_64-centos7/include/c++/12.1.0/bits/istream.tcc:
-/cvmfs/sphenix.sdcc.bnl.gov/gcc-12.1.0/release/release_new/new.1/include/ffarawobjects/Gl1Packetv1.h:
-/cvmfs/sphenix.sdcc.bnl.gov/gcc-12.1.0/release/release_new/new.1/include/ffarawobjects/Gl1Packet.h:
-/cvmfs/sphenix.sdcc.bnl.gov/gcc-12.1.0/release/release_new/new.1/include/ffarawobjects/Gl1Packetv2.h:
+/cvmfs/sphenix.sdcc.bnl.gov/gcc-12.1.0/release/release_new/new.4/include/ffarawobjects/Gl1Packetv1.h:
+/cvmfs/sphenix.sdcc.bnl.gov/gcc-12.1.0/release/release_new/new.4/include/ffarawobjects/Gl1Packet.h:
+/cvmfs/sphenix.sdcc.bnl.gov/gcc-12.1.0/release/release_new/new.4/include/ffarawobjects/Gl1Packetv2.h:

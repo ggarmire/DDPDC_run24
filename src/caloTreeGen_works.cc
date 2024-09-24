@@ -66,6 +66,18 @@ int caloTreeGen::Init(PHCompositeNode *topNode)
 {
   
   out = new TFile(Outfile.c_str(),"RECREATE");
+  h_etaTow = new TH1F("h_etaTow", "eta", 8*96, -0.5, 95.5);
+  h_phiTow = new TH1F("h_phiTow", "phi", 16, -0.5, 1.5); 
+  h_position = new TH2F("h_position", "Position; Eta; Phi", 8*96, -0.5, 95.5, 16, -0.5, 1.5);
+
+  for (int i = 0; i < 16; i++) {      // just sets up the 16 2D hisotgrams (one for each phi bin)
+    h_pi0[i] = new TH2F(Form("h_pi0%i", i), Form("pi0 candidates in phi bin %i", i), bins_etabin, low_etabin, high_etabin, bins_pi0, low_pi0, high_pi0);
+    h_pi0[i]->GetXaxis()->SetTitle("Eta");
+    h_pi0[i]->GetYaxis()->SetTitle("Pi0 Mass (GeV)");
+    h_pi0_onblock[i] = new TH2F(Form("h_pi0_onblock%i", i), Form("pi0 candidates in phi bin %i, conflated eta", i), 16, 0, 16, bins_pi0, low_pi0, high_pi0);
+    h_pi0_onblock[i]->GetXaxis()->SetTitle("Eta");
+    h_pi0_onblock[i]->GetYaxis()->SetTitle("Pi0 Mass (GeV)");
+  }
 
   
   T = new TTree("T","T");
@@ -82,16 +94,19 @@ int caloTreeGen::Init(PHCompositeNode *topNode)
       //EMCal Cluster information
       if(storeEMCal && storeClusters)
 	{
-	  /*T -> Branch("clusterE",&m_clusterE);
+	  /*T -> Branch("clusterE",&m_clusterE);*/
 	  T -> Branch("clusterPhi",&m_clusterPhi);
 	  T -> Branch("clusterEta", &m_clusterEta);
+	  T -> Branch("clusterEta_act", &m_clusterEta_act);
+	  T -> Branch("clusterPhi_act", &m_clusterPhi_act);
 	  T -> Branch("clusterPt_Ecore", &m_clusterPt_Ecore);
-	  T -> Branch("clusterPt_E", &m_clusterPt_E);
+	  T -> Branch("clusterPt_Ecore", &m_clusterPt_Ecore);
+	  //T -> Branch("clusterPt_E", &m_clusterPt_E);
 	  T -> Branch("clusterChi2", &m_clusterChi);
-	  T -> Branch("clusterNtow",&m_clusterNtow);
-	  T -> Branch("clusterTowMaxE",&m_clusterTowMaxE);
-	  T -> Branch("clusterECore",&m_clusterECore);*/
-      T -> Branch("clusterNtow",&m_clusterNtow);
+	  //T -> Branch("clusterNtow",&m_clusterNtow);
+	 // T -> Branch("clusterTowMaxE",&m_clusterTowMaxE);
+	  T -> Branch("clusterECore",&m_clusterECore);
+      //T -> Branch("clusterNtow",&m_clusterNtow);
       T->Branch("pi0_phi",   &pi0_phi_vec);
       T->Branch("pi0_eta",   &pi0_eta_vec);
       T->Branch("pi0_pt",    &pi0_pt_vec);
@@ -157,7 +172,6 @@ int caloTreeGen::Init(PHCompositeNode *topNode)
   if(storeTrig)T -> Branch("trigscaledvec",&gl1_scaledvec);
   
   
-  //zVertex = new TH1F("zVertex","zVertex",200,-100,100);
 
  //so that the histos actually get written out
   Fun4AllServer *se = Fun4AllServer::instance();
@@ -170,6 +184,8 @@ int caloTreeGen::Init(PHCompositeNode *topNode)
 //____________________________________________________________________________..
 int caloTreeGen::InitRun(PHCompositeNode *topNode)
 {
+  
+
   std::cout << "caloTreeGen::InitRun(PHCompositeNode *topNode) Initializing for Run XXX" << std::endl;
   return Fun4AllReturnCodes::EVENT_OK;
 }
@@ -325,6 +341,7 @@ const int nphibin = towergeom->get_phibins();
 	  float nTowers = recoCluster ->getNTowers(); 
 	  float maxTowerEnergy = getMaxTowerE(recoCluster,emcTowerContainer);
 
+      if (clusE < clus1min) continue;
 	  m_clusterE.push_back(clusE);
 	  m_clusterECore.push_back(clusEcore);
 	  m_clusterPhi.push_back(clus_phi);
@@ -334,7 +351,6 @@ const int nphibin = towergeom->get_phibins();
 	  m_clusterChi.push_back(clus_chi);
 	  m_clusterNtow.push_back(nTowers);
 	  m_clusterTowMaxE.push_back(maxTowerEnergy);
-      if (clusE < 0.5) continue;
       TLorentzVector photon1;
       photon1.SetPtEtaPhiE(clus_pt, clus_eta, clus_phi, clusEcore);
 
@@ -362,11 +378,18 @@ const int nphibin = towergeom->get_phibins();
         float avgeta1 = getAvgEta(toweretas, towerenergies);                                                                    
         float avgphi1 = getAvgPhi(towerphis, towerenergies, nphibin);
 
+        m_clusterEta_act.push_back(avgeta1);
+        m_clusterPhi_act.push_back(avgphi1);
+
+
+        
 
 
 
       for (clusterIter2 = clusterEnd.first; clusterIter2 != clusterEnd.second; clusterIter2++) {
         if (clusterIter == clusterIter2) continue;
+        if (sqrt(pow(m_vertex, 2)) > vertexcut)continue;
+        if (isminbias == 0)continue; 
         RawCluster* recoCluster2 = clusterIter2->second;
         CLHEP::Hep3Vector vertex2(0, 0, 0);
         CLHEP::Hep3Vector E_vec_cluster2 = RawClusterUtility::GetECoreVec(*recoCluster2, vertex2);
@@ -376,7 +399,8 @@ const int nphibin = towergeom->get_phibins();
         float clus2_pt = E_vec_cluster2.perp();
         float clus2_chisq = recoCluster2->get_chi2();
         //if (clus2_chisq > 4) continue;
-        if (clus2E < 0.5) continue;
+        if (std::max(clusE, clus2E) < clus1min) continue;
+        if (std::min(clusE, clus2E) < clus2min) continue;
         TLorentzVector photon2;
         photon2.SetPtEtaPhiE(clus2_pt, clus2_eta, clus2_phi, clus2E);
         float asym = sqrt(pow(clusEcore - clus2E, 2)) / (clusEcore + clus2E);
@@ -412,7 +436,7 @@ const int nphibin = towergeom->get_phibins();
         if (std::min(clusE, clus2E) < 0.5) continue;
         float chi2max = std::max(clus_chi, clus2_chisq);
         if (chi2max > 4) continue;
-        //if (asym > 0.7) continue;
+        if (asym > 0.7) continue;
         pi0_phi_vec.push_back(pi0.Phi());
         pi0_mass_vec.push_back(pi0.M());
         pi0_eta_vec.push_back(pi0.Eta());
@@ -425,6 +449,26 @@ const int nphibin = towergeom->get_phibins();
         pi0clus2_E_vec.push_back(clus2E);
         pi0clus1_phitow_vec.push_back(avgphi1);
         pi0clus2_phitow_vec.push_back(avgphi2);
+
+        h_etaTow->Fill(avgeta1);
+        h_etaTow->Fill(avgeta2);
+        h_phiTow->Fill(avgphi1);
+        h_phiTow->Fill(avgphi2);
+
+        phibin1 = floor((8*(avgphi1+.5))); 
+        phibin2 = floor((8*(avgphi2+.5)));
+        etabin1 = floor((8*(avgeta1+.5)));
+        etabin2 = floor((8*(avgeta2+.5)));
+
+        h_position->Fill(avgeta1, avgphi1);
+        h_position->Fill(avgeta2, avgphi2);
+
+        h_pi0[phibin1]->Fill(etabin1, pi0.M());
+        h_pi0[phibin2]->Fill(etabin2, pi0.M());
+        h_pi0_onblock[phibin1]->Fill(etabin1%16, pi0.M());
+        h_pi0_onblock[phibin2]->Fill(etabin2%16, pi0.M());
+
+
 
 
         //h_invmass->Fill(pi0.M());
@@ -561,6 +605,8 @@ int caloTreeGen::ResetEvent(PHCompositeNode *topNode)
   m_clusterE.clear();
   m_clusterPhi.clear();
   m_clusterEta.clear();
+  m_clusterPhi_act.clear();
+  m_clusterEta_act.clear();
   m_clusterPt_E.clear();
   m_clusterPt_Ecore.clear();
   m_clusterChi.clear();
@@ -622,7 +668,13 @@ int caloTreeGen::End(PHCompositeNode *topNode)
   std::cout << "caloTreeGen::End(PHCompositeNode *topNode) This is the End..." << std::endl;
 
   out -> cd();
-  T -> Write();
+  h_etaTow->Write();
+  h_phiTow->Write();
+  h_position->Write();
+  for (int i = 0; i < 16; i++) h_pi0[i]->Write();
+  for (int i = 0; i < 16; i++) h_pi0_onblock[i]->Write();
+
+  //T -> Write();
   //zVertex -> Write();
   out -> Close();
   delete out;

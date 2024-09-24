@@ -66,101 +66,21 @@ int caloTreeGen::Init(PHCompositeNode *topNode)
 {
   
   out = new TFile(Outfile.c_str(),"RECREATE");
+  h_etaTow = new TH1F("h_etaTow", "eta", 8*96, -0.5, 95.5);
+  h_phiTow = new TH1F("h_phiTow", "phi", 16, -0.5, 1.5); 
+  h_position = new TH2F("h_position", "Position of all clusters going into diphoton spectra ; Eta; Phi", 8*96, -0.5, 95.5, 16, -0.5, 1.5);
+  h_position_clus = new TH2F("h_position_clus", "Position of all clusters E>1GeV; Eta; Phi", 8*96, -0.5, 95.5, 16, -0.5, 1.5);
+  h_fullpi0 = new TH1F("h_fullpi0", "Full Diphoton spectrum; mass [GeV]; counts", bins_pi0, low_pi0, high_pi0);
 
-  
-  T = new TTree("T","T");
-  
-  //Electromagnetic Calorimeter
-  if(storeEMCal)
-    {
-      /*T -> Branch("emcTowE",&m_emcTowE);
-      T -> Branch("emcTowiEta",&m_emciEta);
-      T -> Branch("emcTowiPhi",&m_emciPhi);
-      T -> Branch("emcTime",&m_emcTime);
-      T -> Branch("emcChi2",&m_emcChi2);
-      T -> Branch("emcPed",&m_emcPed);*/
-      //EMCal Cluster information
-      if(storeEMCal && storeClusters)
-	{
-	  /*T -> Branch("clusterE",&m_clusterE);*/
-	  T -> Branch("clusterPhi",&m_clusterPhi);
-	  T -> Branch("clusterEta", &m_clusterEta);
-	  T -> Branch("clusterEta_act", &m_clusterEta_act);
-	  T -> Branch("clusterPhi_act", &m_clusterPhi_act);
-	  T -> Branch("clusterPt_Ecore", &m_clusterPt_Ecore);
-	  T -> Branch("clusterPt_Ecore", &m_clusterPt_Ecore);
-	  //T -> Branch("clusterPt_E", &m_clusterPt_E);
-	  T -> Branch("clusterChi2", &m_clusterChi);
-	  //T -> Branch("clusterNtow",&m_clusterNtow);
-	 // T -> Branch("clusterTowMaxE",&m_clusterTowMaxE);
-	  T -> Branch("clusterECore",&m_clusterECore);
-      //T -> Branch("clusterNtow",&m_clusterNtow);
-      T->Branch("pi0_phi",   &pi0_phi_vec);
-      T->Branch("pi0_eta",   &pi0_eta_vec);
-      T->Branch("pi0_pt",    &pi0_pt_vec);
-      T->Branch("pi0_mass",  &pi0_mass_vec);
-      T->Branch("asym",      &asym_vec);
-      T->Branch("chi2_max",  &chi2_max_vec);
-      T->Branch("pi0clus1_etatow", &pi0clus1_etatow_vec);
-      T->Branch("pi0clus1_phitow", &pi0clus1_phitow_vec);
-      T->Branch("pi0clus1_E", &pi0clus1_E_vec);
-      T->Branch("pi0clus2_etatow", &pi0clus2_etatow_vec);
-      T->Branch("pi0clus2_phitow", &pi0clus2_phitow_vec);
-      T->Branch("pi0clus2_E", &pi0clus2_E_vec);
+  for (int i = 0; i < 16; i++) {      // just sets up the 16 2D hisotgrams (one for each phi bin)
+    h_pi0[i] = new TH2F(Form("h_pi0%i", i), Form("pi0 candidates in phi bin %i", i), bins_etabin, low_etabin, high_etabin, bins_pi0, low_pi0, high_pi0);
+    h_pi0[i]->GetXaxis()->SetTitle("Eta");
+    h_pi0[i]->GetYaxis()->SetTitle("Pi0 Mass (GeV)");
+    h_pi0_onblock[i] = new TH2F(Form("h_pi0_onblock%i", i), Form("pi0 candidates in phi bin %i, conflated eta", i), 16, 0, 16, bins_pi0, low_pi0, high_pi0);
+    h_pi0_onblock[i]->GetXaxis()->SetTitle("Eta");
+    h_pi0_onblock[i]->GetYaxis()->SetTitle("Pi0 Mass (GeV)");
+  }
 
-	  //Information for towers within clusters
-	  //Enabled by setting "DoFineClusters" in the macro
-	  if(storeEMCal && storeClusters && storeClusterDetails)
-	    {
-	      T -> Branch("clusTowPhi","vector<vector<int> >",&m_clusTowPhi);
-	      T -> Branch("clusTowEta","vector<vector<int> >",&m_clusTowEta);
-	      T -> Branch("clusTowE","vector<vector<float> >",&m_clusTowE);
-	    }
-	}
-    }
-  //Outer Hadronic Calorimeter
-  if(storeHCals)
-    {
-      T -> Branch("ohcTowE",&m_ohcTowE);
-      T -> Branch("ohcTowiEta",&m_ohciTowEta);
-      T -> Branch("ohcTowiPhi",&m_ohciTowPhi);
-      T -> Branch("ohcTime",&m_ohcTime);
-      T -> Branch("ohcChi2",&m_ohcChi2);
-      T -> Branch("ohcPed",&m_ohcPed);
-  
-      //Inner Hadronic Calorimeter
-      T -> Branch("ihcTowE",&m_ihcTowE);
-      T -> Branch("ihcTowiEta",&m_ihciTowEta);
-      T -> Branch("ihcTowiPhi",&m_ihciTowPhi);
-      T -> Branch("ihcTime",&m_ihcTime);
-      T -> Branch("ihcChi2",&m_ihcChi2);
-      T -> Branch("ihcPed",&m_ihcPed);
-    }
-  //ZDC information
-  if(storeZDC)
-    {
-      T -> Branch("zdcTowE",&m_zdcTowE);
-      T -> Branch("zdcTowside",&m_zdcSide);
-  
-      //SMD information
-      T -> Branch("smdE",&m_smdE);
-      T -> Branch("smdSide",&m_smdSide);
-    }
-  //Total 
-  T -> Branch("totalCaloEEMCal",&totalCaloEEMCal);
-  /*
-  T -> Branch("totalCaloEOHCal",&totalCaloEOHCal);
-  T -> Branch("totalCaloEIHCal",&totalCaloEIHCal);
-  T -> Branch("totalCaloEZDC",&totalCaloEZDC);
-  */
-  T -> Branch("isminbias",&isminbias);
-  T -> Branch("zvertex",&m_vertex);
-
-  //GL1 Information
-  if(storeTrig)T -> Branch("trigscaledvec",&gl1_scaledvec);
-  
-  
-  //zVertex = new TH1F("zVertex","zVertex",200,-100,100);
 
  //so that the histos actually get written out
   Fun4AllServer *se = Fun4AllServer::instance();
@@ -173,6 +93,8 @@ int caloTreeGen::Init(PHCompositeNode *topNode)
 //____________________________________________________________________________..
 int caloTreeGen::InitRun(PHCompositeNode *topNode)
 {
+  
+
   std::cout << "caloTreeGen::InitRun(PHCompositeNode *topNode) Initializing for Run XXX" << std::endl;
   return Fun4AllReturnCodes::EVENT_OK;
 }
@@ -284,20 +206,14 @@ const int nphibin = towergeom->get_phibins();
       totalCaloEEMCal = 0;
       for(unsigned int iter = 0; iter < tower_range; iter++)
 	{
-	  unsigned int towerkey = emcTowerContainer->encode_key(iter);
-	  unsigned int ieta = TowerInfoDefs::getCaloTowerEtaBin(towerkey);
-	  unsigned int iphi = TowerInfoDefs::getCaloTowerPhiBin(towerkey);
+	  //unsigned int towerkey = emcTowerContainer->encode_key(iter);
+	  //unsigned int ieta = TowerInfoDefs::getCaloTowerEtaBin(towerkey);
+	  //unsigned int iphi = TowerInfoDefs::getCaloTowerPhiBin(towerkey);
 	  double energy = emcTowerContainer -> get_tower_at_channel(iter) -> get_energy();
-	  int time =  emcTowerContainer -> get_tower_at_channel(iter) -> get_time();
-	  float chi2 = emcTowerContainer -> get_tower_at_channel(iter) -> get_chi2();
-	  float pedestal = emcTowerContainer -> get_tower_at_channel(iter) -> get_pedestal();
+	  //int time =  emcTowerContainer -> get_tower_at_channel(iter) -> get_time();
+	  //float chi2 = emcTowerContainer -> get_tower_at_channel(iter) -> get_chi2();
+	  //float pedestal = emcTowerContainer -> get_tower_at_channel(iter) -> get_pedestal();
 	  totalCaloEEMCal += energy;
-	  m_emciPhi.push_back(iphi);
-	  m_emciEta.push_back(ieta);
-	  m_emcTowE.push_back(energy);
-	  m_emcTime.push_back(time);
-	  m_emcChi2.push_back(chi2);
-	  m_emcPed.push_back(pedestal);
 	} 
     }
   
@@ -323,21 +239,12 @@ const int nphibin = towergeom->get_phibins();
 	  float clus_eta = E_vec_cluster.pseudoRapidity();
 	  float clus_phi = E_vec_cluster.phi();
 	  float clus_pt = E_vec_cluster.perp();
-	  float clus_pt_E = E_vec_cluster_Full.perp();
+	  //float clus_pt_E = E_vec_cluster_Full.perp();
 	  float clus_chi = recoCluster -> get_chi2();
-	  float nTowers = recoCluster ->getNTowers(); 
-	  float maxTowerEnergy = getMaxTowerE(recoCluster,emcTowerContainer);
+      //float nTowers = recoCluster ->getNTowers(); 
+	  //float maxTowerEnergy = getMaxTowerE(recoCluster,emcTowerContainer);
 
-      if (clusE < 0.5) continue;
-	  m_clusterE.push_back(clusE);
-	  m_clusterECore.push_back(clusEcore);
-	  m_clusterPhi.push_back(clus_phi);
-	  m_clusterEta.push_back(clus_eta);
-	  m_clusterPt_Ecore.push_back(clus_pt);
-	  m_clusterPt_E.push_back(clus_pt_E);
-	  m_clusterChi.push_back(clus_chi);
-	  m_clusterNtow.push_back(nTowers);
-	  m_clusterTowMaxE.push_back(maxTowerEnergy);
+      if (clusE < clus1min) continue;
       TLorentzVector photon1;
       photon1.SetPtEtaPhiE(clus_pt, clus_eta, clus_phi, clusEcore);
 
@@ -364,17 +271,12 @@ const int nphibin = towergeom->get_phibins();
         }                                                                                                                   
         float avgeta1 = getAvgEta(toweretas, towerenergies);                                                                    
         float avgphi1 = getAvgPhi(towerphis, towerenergies, nphibin);
-
-        m_clusterEta_act.push_back(avgeta1);
-        m_clusterPhi_act.push_back(avgphi1);
-
-
-        
-
-
+        h_position_clus ->Fill(avgeta1, avgphi1);
 
       for (clusterIter2 = clusterEnd.first; clusterIter2 != clusterEnd.second; clusterIter2++) {
         if (clusterIter == clusterIter2) continue;
+        if (sqrt(pow(m_vertex, 2)) > vertexcut)continue;
+        if (isminbias == 0)continue; 
         RawCluster* recoCluster2 = clusterIter2->second;
         CLHEP::Hep3Vector vertex2(0, 0, 0);
         CLHEP::Hep3Vector E_vec_cluster2 = RawClusterUtility::GetECoreVec(*recoCluster2, vertex2);
@@ -384,7 +286,8 @@ const int nphibin = towergeom->get_phibins();
         float clus2_pt = E_vec_cluster2.perp();
         float clus2_chisq = recoCluster2->get_chi2();
         //if (clus2_chisq > 4) continue;
-        if (clus2E < 0.5) continue;
+        if (std::max(clusE, clus2E) < clus1min) continue;
+        if (std::min(clusE, clus2E) < clus2min) continue;
         TLorentzVector photon2;
         photon2.SetPtEtaPhiE(clus2_pt, clus2_eta, clus2_phi, clus2E);
         float asym = sqrt(pow(clusEcore - clus2E, 2)) / (clusEcore + clus2E);
@@ -420,19 +323,29 @@ const int nphibin = towergeom->get_phibins();
         if (std::min(clusE, clus2E) < 0.5) continue;
         float chi2max = std::max(clus_chi, clus2_chisq);
         if (chi2max > 4) continue;
-        //if (asym > 0.7) continue;
-        pi0_phi_vec.push_back(pi0.Phi());
-        pi0_mass_vec.push_back(pi0.M());
-        pi0_eta_vec.push_back(pi0.Eta());
-        pi0_pt_vec.push_back(pi0.Pt());
-        asym_vec.push_back(asym);
-        chi2_max_vec.push_back(chi2max);
-        pi0clus1_etatow_vec.push_back(avgeta1);
-        pi0clus2_etatow_vec.push_back(avgeta2);
-        pi0clus1_E_vec.push_back(clusE);
-        pi0clus2_E_vec.push_back(clus2E);
-        pi0clus1_phitow_vec.push_back(avgphi1);
-        pi0clus2_phitow_vec.push_back(avgphi2);
+        if (asym > 0.7) continue;
+
+        h_etaTow->Fill(avgeta1);
+        h_etaTow->Fill(avgeta2);
+        h_phiTow->Fill(avgphi1);
+        h_phiTow->Fill(avgphi2);
+
+        phibin1 = floor((8*(avgphi1+.5))); 
+        phibin2 = floor((8*(avgphi2+.5)));
+        etabin1 = floor((8*(avgeta1+.5)));
+        etabin2 = floor((8*(avgeta2+.5)));
+
+        h_position->Fill(avgeta1, avgphi1);
+        h_position->Fill(avgeta2, avgphi2);
+
+        h_pi0[phibin1]->Fill(etabin1, pi0.M());
+        h_pi0[phibin2]->Fill(etabin2, pi0.M());
+        h_pi0_onblock[phibin1]->Fill(etabin1%16, pi0.M());
+        h_pi0_onblock[phibin2]->Fill(etabin2%16, pi0.M());
+
+        h_fullpi0->Fill(pi0.M());
+        std::cout<< pi0.M()<<std::endl;
+
 
 
         //h_invmass->Fill(pi0.M());
@@ -440,125 +353,9 @@ const int nphibin = towergeom->get_phibins();
 
 
       
-      if(storeClusterDetails)
-	    {
-	      m_clusTowPhi.push_back(returnClusterTowPhi(recoCluster,emcTowerContainer));
-	      m_clusTowEta.push_back(returnClusterTowEta(recoCluster,emcTowerContainer));
-	      m_clusTowE.push_back(returnClusterTowE(recoCluster,emcTowerContainer));
-	    }		     
 	}
     }
 
-  
-  //tower information
-  TowerInfoContainer *ohcTowerContainer = findNode::getClass<TowerInfoContainer>(topNode,m_ohcTowerNode);
-  TowerInfoContainer *ihcTowerContainer = findNode::getClass<TowerInfoContainer>(topNode,m_ihcTowerNode.c_str());
-	
-  if(!ohcTowerContainer || !ihcTowerContainer)
-    {
-      std::cout << PHWHERE << "caloTreeGen::process_event: " << m_ohcTowerNode << " or " << m_ohcTowerNode << " node is missing. Output related to this node will be empty" << std::endl;
-      return Fun4AllReturnCodes::ABORTEVENT;
-    }
-  
-  if(storeHCals && ohcTowerContainer && ihcTowerContainer)
-    {
-      tower_range = ohcTowerContainer->size();
-      totalCaloEOHCal = 0;
-      for(unsigned int iter = 0; iter < tower_range; iter++)
-	{
-	  unsigned int towerkey = ohcTowerContainer->encode_key(iter);
-	  unsigned int ieta = TowerInfoDefs::getCaloTowerEtaBin(towerkey);
-	  unsigned int iphi = TowerInfoDefs::getCaloTowerPhiBin(towerkey);
-	  int time =  ohcTowerContainer -> get_tower_at_channel(iter) -> get_time();
-	  float chi2 = ohcTowerContainer -> get_tower_at_channel(iter) -> get_chi2();
-	  double energy = ohcTowerContainer -> get_tower_at_channel(iter) -> get_energy();
-	  float pedestal = ohcTowerContainer -> get_tower_at_channel(iter) -> get_pedestal();
-
-	  totalCaloEOHCal += energy;
-	  m_ohcTowE.push_back(energy);
-	  m_ohciTowEta.push_back(ieta);
-	  m_ohciTowPhi.push_back(iphi);
-	  m_ohcTime.push_back(time);
-	  m_ohcChi2.push_back(chi2);
-      	  m_ohcPed.push_back(pedestal);
-
-	} 
-    
-      tower_range = ihcTowerContainer->size();
-      totalCaloEIHCal = 0;
-      for(unsigned int iter = 0; iter < tower_range; iter++)
-	{
-	  unsigned int towerkey = ihcTowerContainer->encode_key(iter);
-	  unsigned int ieta = TowerInfoDefs::getCaloTowerEtaBin(towerkey);
-	  unsigned int iphi = TowerInfoDefs::getCaloTowerPhiBin(towerkey);
-	  int time =  ohcTowerContainer -> get_tower_at_channel(iter) -> get_time();
-	  float chi2 = ohcTowerContainer -> get_tower_at_channel(iter) -> get_chi2();
-	  double energy = ihcTowerContainer -> get_tower_at_channel(iter) -> get_energy();
-	  float pedestal = ihcTowerContainer -> get_tower_at_channel(iter) -> get_pedestal();
-
-	  totalCaloEIHCal += energy;
-	  m_ihcTowE.push_back(energy);
-	  m_ihciTowEta.push_back(ieta);
-	  m_ihciTowPhi.push_back(iphi);
-	  m_ihcTime.push_back(time);
-	  m_ihcChi2.push_back(chi2);
-	  m_ihcPed.push_back(pedestal);
-
-	} 
-    }
-  
-  TowerInfoContainer *zdcTowerContainer = findNode::getClass<TowerInfoContainer>(topNode,m_zdcTowerNode.c_str());
-  if(!zdcTowerContainer)
-    {
-      std::cout << PHWHERE << "caloTreeGen::process_event: " << m_emcTowerNode << " node is missing. Output related to this node will be empty" << std::endl;
-      return Fun4AllReturnCodes::ABORTEVENT;
-    }
-  
-  if(storeZDC && zdcTowerContainer)
-    {
-      tower_range = zdcTowerContainer ->size();
-      totalCaloEZDC = 0;
-      for(unsigned int iter = 0; iter < tower_range; iter++)
-	{
-	  if(iter < 16)
-	    {
-	      float energy = zdcTowerContainer -> get_tower_at_channel(iter) -> get_energy();
-	      m_zdcTowE.push_back(energy);
-	      unsigned int towerkey = zdcTowerContainer->encode_key(iter);
-	      unsigned int side = TowerInfoDefs::get_zdc_side(towerkey);
-	      m_zdcSide.push_back(side);
-	      totalCaloEZDC += energy;
-	    }
-	  if(iter > 15 && iter < 48)
-	    {
-	      //smd north stuff
-	      float energy = zdcTowerContainer -> get_tower_at_channel(iter) -> get_energy();
-	      m_smdE.push_back(energy);
-	      unsigned int towerkey = zdcTowerContainer->encode_key(iter);
-	      unsigned int side = TowerInfoDefs::get_zdc_side(towerkey);
-	      m_smdSide.push_back(side);
-	    }
-	}
-    }
-
-  
-  /*Gl1Packet *gl1PacketInfo = findNode::getClass<Gl1Packet>(topNode,m_trigNode.c_str());
-  if(!gl1PacketInfo && storeTrig)
-    {
-      std::cout << PHWHERE << "caloTreeGen::process_event: " << m_trigNode<< " node is missing. Output related to this node will be empty" << std::endl;
-    }
-
-  if(storeTrig && gl1PacketInfo)
-    {
-      uint64_t triggervec =  gl1PacketInfo->getTriggerVector();
-      for(int i = 0; i < 64; i++)
-	{
-	  bool trig_decision = ((triggervec & 0x1U) == 0x1U);
-	  m_triggerVector.push_back(trig_decision);
-	  triggervec = (triggervec >> 1U) & 0xffffffffU;
-	}
-    }*/
-    if (isminbias != 0) T -> Fill();
   
   return Fun4AllReturnCodes::EVENT_OK;
 }
@@ -566,56 +363,6 @@ const int nphibin = towergeom->get_phibins();
 //____________________________________________________________________________..
 int caloTreeGen::ResetEvent(PHCompositeNode *topNode)
 {
-  m_clusterE.clear();
-  m_clusterPhi.clear();
-  m_clusterEta.clear();
-  m_clusterPhi_act.clear();
-  m_clusterEta_act.clear();
-  m_clusterPt_E.clear();
-  m_clusterPt_Ecore.clear();
-  m_clusterChi.clear();
-  m_clusterTowMaxE.clear();
-  m_clusterNtow.clear();
-  m_clusterECore.clear();
-
-  m_emcTowE.clear();
-  m_emciEta.clear();
-  m_emciPhi.clear();
-  m_emcTime.clear();
-  m_emcChi2.clear();
-  m_emcPed.clear();
-
-  m_ihcTowE.clear();
-  m_ihciTowEta.clear();
-  m_ihciTowPhi.clear();
-  m_ihcTime.clear();
-  m_ihcChi2.clear();
-  m_ihcPed.clear();
-
-  m_ohcTowE.clear();
-  m_ohciTowEta.clear();
-  m_ohciTowPhi.clear();
-  m_ohcTime.clear();
-  m_ohcChi2.clear();
-  m_ohcPed.clear();
-
-
-  m_clusTowPhi.clear();
-  m_clusTowEta.clear();
-  m_clusTowE.clear();
-  pi0_phi_vec.clear();
-  pi0_mass_vec.clear();
-  pi0_eta_vec.clear();
-  pi0_pt_vec.clear();
-  asym_vec.clear();
-  chi2_max_vec.clear();
-  pi0clus1_etatow_vec.clear();
-  pi0clus2_etatow_vec.clear();
-  pi0clus1_phitow_vec.clear();
-  pi0clus2_phitow_vec.clear();
-  pi0clus1_E_vec.clear();
-  pi0clus2_E_vec.clear();
- 
   return Fun4AllReturnCodes::EVENT_OK;
 }
 
@@ -632,7 +379,15 @@ int caloTreeGen::End(PHCompositeNode *topNode)
   std::cout << "caloTreeGen::End(PHCompositeNode *topNode) This is the End..." << std::endl;
 
   out -> cd();
-  T -> Write();
+  h_etaTow->Write();
+  h_phiTow->Write();
+  h_position->Write();
+  h_position_clus->Write();
+  h_fullpi0->Write();
+  for (int i = 0; i < 16; i++) h_pi0[i]->Write();
+  for (int i = 0; i < 16; i++) h_pi0_onblock[i]->Write();
+
+  //T -> Write();
   //zVertex -> Write();
   out -> Close();
   delete out;

@@ -17,7 +17,7 @@ old_library='libcaloTreeGen.a'
 inherited_linker_flags=''
 
 # Libraries that this one depends upon.
-dependency_libs=' -L/sphenix/u/ggarmire/install/lib -L/cvmfs/sphenix.sdcc.bnl.gov/gcc-12.1.0/release/release_new/new.2/lib -L/cvmfs/sphenix.sdcc.bnl.gov/gcc-12.1.0/release/release_new/new.2/lib64 -lcalo_io -lCLHEP -lglobalvertex -lglobalvertex_io -lphool -lSubsysReco -lffarawmodules /cvmfs/sphenix.sdcc.bnl.gov/gcc-12.1.0/opt/sphenix/core/gcc/12.1.0-57c96/x86_64-centos7/bin/../lib/gcc/x86_64-pc-linux-gnu/12.1.0/../../../../lib64/libstdc++.la'
+dependency_libs=' -L/sphenix/u/ggarmire/install/lib -L/cvmfs/sphenix.sdcc.bnl.gov/gcc-12.1.0/release/release_new/new.4/lib -L/cvmfs/sphenix.sdcc.bnl.gov/gcc-12.1.0/release/release_new/new.4/lib64 -lcalo_io -lCLHEP -lglobalvertex -lglobalvertex_io -lphool -lSubsysReco -lffarawmodules /cvmfs/sphenix.sdcc.bnl.gov/gcc-12.1.0/opt/sphenix/core/gcc/12.1.0-57c96/x86_64-centos7/bin/../lib/gcc/x86_64-pc-linux-gnu/12.1.0/../../../../lib64/libstdc++.la'
 
 # Names of additional weak libraries provided by this library
 weak_library_names=''
