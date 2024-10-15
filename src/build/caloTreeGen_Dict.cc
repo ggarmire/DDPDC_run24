@@ -482,6 +482,7 @@ class caloTreeGen : public SubsysReco
   //GL1 information
   Gl1Packet *_gl1_packet;
   uint64_t gl1_scaledvec;
+  uint64_t b_gl1_scaledvec;
   int isminbias;
 
   float m_vertex;
@@ -497,6 +498,8 @@ class caloTreeGen : public SubsysReco
   TH1F *h_phiTow;
   TH2F *h_position;
   TH2F *h_position_clus;
+  TH2F *h_position_clus_g1;
+  TH2F *h_position_clus_n1;
   TH1F *h_fullpi0;
   TH2F *h_pi0[16]; 
   TH2F *h_pi0_onblock[16]; 

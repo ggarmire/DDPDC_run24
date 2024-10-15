@@ -68,8 +68,10 @@ int caloTreeGen::Init(PHCompositeNode *topNode)
   out = new TFile(Outfile.c_str(),"RECREATE");
   h_etaTow = new TH1F("h_etaTow", "eta", 8*96, -0.5, 95.5);
   h_phiTow = new TH1F("h_phiTow", "phi", 16, -0.5, 1.5); 
-  h_position = new TH2F("h_position", "Position of all clusters going into diphoton spectra ; Eta; Phi", 8*96, -0.5, 95.5, 16, -0.5, 1.5);
+  h_position = new TH2F("h_position", "Position of all clusters going into diphoton spectra ; Eta; Phi", 8*96, -0.5625, 95.4375, 16, -0.5, 1.5);
   h_position_clus = new TH2F("h_position_clus", "Position of all clusters E>1GeV; Eta; Phi", 8*96, -0.5, 95.5, 16, -0.5, 1.5);
+  h_position_clus_g1 = new TH2F("h_position_clus_g1", "Position of all clusters E>1GeV, Ntow>1; Eta; Phi", 8*96, -0.5625, 95.4375, 16, -0.5, 1.5);
+  h_position_clus_n1 = new TH2F("h_position_clus_n1", "Position of single-tower clusters E>1GeV; Eta; Phi", 8*96, -0.5625, 95.4375, 16, -0.5, 1.5);
   h_fullpi0 = new TH1F("h_fullpi0", "Full Diphoton spectrum; mass [GeV]; counts", bins_pi0, low_pi0, high_pi0);
 
   for (int i = 0; i < 16; i++) {      // just sets up the 16 2D hisotgrams (one for each phi bin)
@@ -101,12 +103,11 @@ int caloTreeGen::InitRun(PHCompositeNode *topNode)
 
 static float getAvgEta(const std::vector<float> &toweretas, const std::vector<float> &towerenergies) {                  
     float etamult = 0;                                                                                                  
-    float etasum = 0;                                                                                                   
-                                                                                                                                    
+    float etasum = 0;                                                                                                                                        
     for (UInt_t j = 0; j < towerenergies.size(); j++) {                                                                 
         float energymult = towerenergies.at(j) * toweretas.at(j);                                                       
         etamult += energymult;                                                                                      
-        etasum += towerenergies.at(j);                                                                                                                                      
+        etasum += towerenergies.at(j);                                  
     }                                                                                                                   
     return etamult / etasum;                                                                                            
 }    
@@ -144,7 +145,7 @@ static float getAvgPhi(const std::vector<float> &towerphis, const std::vector<fl
 //____________________________________________________________________________..
 int caloTreeGen::process_event(PHCompositeNode *topNode)
 {
-    isminbias = 1;
+ /*   isminbias = 1;
    _gl1_packet = findNode::getClass<Gl1Packet>(topNode, "GL1Packet");
     // check if trigger is #11 (MBD coincidence)
     if (!_gl1_packet) isminbias = 0; 
@@ -152,7 +153,21 @@ int caloTreeGen::process_event(PHCompositeNode *topNode)
     std::bitset<64> bits(gl1_scaledvec);
     if (!bits.test(10) and !bits.test(12)) isminbias = 0;
     if (bits.test(10)) isminbias =10;
-    if (bits.test(12)) isminbias =12;
+    if (bits.test(12)) isminbias =12;*/
+
+   _gl1_packet = findNode::getClass<Gl1Packet>(topNode, "GL1Packet");
+    if(_gl1_packet) b_gl1_scaledvec = _gl1_packet->lValue(0, "ScaledVector");
+
+    isminbias = 0;
+    std::vector<int> trig_bits;
+    std::bitset<64> bits(b_gl1_scaledvec);
+    for (unsigned int b =0; b < 64; b++) {
+        if ((b_gl1_scaledvec >> b) & 0x1U) trig_bits.push_back(b);
+        }
+
+    for (const int &bit : trig_bits){
+        if ((bit == 10) or (bit ==12)) isminbias = bit;
+    }
 
     //if (isminbias == 1) std::cout << "minbias, gl1_scaledvec (bits): " << bits.to_string() << std::endl;
     //if (isminbias != 1) std::cout << "not minbias, gl1_scaledvec (bits): " << bits.to_string() << std::endl;
@@ -172,7 +187,7 @@ int caloTreeGen::process_event(PHCompositeNode *topNode)
 	  //zVertex -> Fill(m_vertex);
 	}
     }
-  
+    if (abs(m_vertex) > 20) isminbias = 0;
 
    //Information on clusters
   RawClusterContainer *clusterContainer = findNode::getClass<RawClusterContainer>(topNode,m_clusterNode.c_str());
@@ -228,6 +243,7 @@ const int nphibin = towergeom->get_phibins();
       for(clusterIter = clusterEnd.first; clusterIter != clusterEnd.second; clusterIter++)
 	{
 	  RawCluster *recoCluster = clusterIter -> second;
+      if (isminbias == 0) continue;
 
 	  CLHEP::Hep3Vector vertex(0,0,0);
 	  if(m_vertex != -9999)vertex.setZ(m_vertex);
@@ -241,7 +257,7 @@ const int nphibin = towergeom->get_phibins();
 	  float clus_pt = E_vec_cluster.perp();
 	  //float clus_pt_E = E_vec_cluster_Full.perp();
 	  float clus_chi = recoCluster -> get_chi2();
-      //float nTowers = recoCluster ->getNTowers(); 
+      float nTowers = recoCluster ->getNTowers(); 
 	  //float maxTowerEnergy = getMaxTowerE(recoCluster,emcTowerContainer);
 
       if (clusE < clus1min) continue;
@@ -254,7 +270,6 @@ const int nphibin = towergeom->get_phibins();
 
         RawCluster::TowerConstRange towers = recoCluster->get_towers();                                                     
         RawCluster::TowerConstIterator toweriter;                                                                           
-
         for (toweriter = towers.first; toweriter != towers.second; ++toweriter)                                             
         {                                                                                                                   
             int iphi = RawTowerDefs::decode_index2(toweriter->first);  //index2 is phi in CYL                               
@@ -272,6 +287,8 @@ const int nphibin = towergeom->get_phibins();
         float avgeta1 = getAvgEta(toweretas, towerenergies);                                                                    
         float avgphi1 = getAvgPhi(towerphis, towerenergies, nphibin);
         h_position_clus ->Fill(avgeta1, avgphi1);
+        if (nTowers > 1) h_position_clus_g1->Fill(avgeta1, avgphi1);
+        if (nTowers == 1) h_position_clus_n1->Fill(avgeta1, avgphi1);
 
       for (clusterIter2 = clusterEnd.first; clusterIter2 != clusterEnd.second; clusterIter2++) {
         if (clusterIter == clusterIter2) continue;
@@ -344,7 +361,7 @@ const int nphibin = towergeom->get_phibins();
         h_pi0_onblock[phibin2]->Fill(etabin2%16, pi0.M());
 
         h_fullpi0->Fill(pi0.M());
-        std::cout<< pi0.M()<<std::endl;
+        //std::cout<< pi0.M()<<std::endl;
 
 
 
@@ -383,6 +400,8 @@ int caloTreeGen::End(PHCompositeNode *topNode)
   h_phiTow->Write();
   h_position->Write();
   h_position_clus->Write();
+  h_position_clus_g1->Write();
+  h_position_clus_n1->Write();
   h_fullpi0->Write();
   for (int i = 0; i < 16; i++) h_pi0[i]->Write();
   for (int i = 0; i < 16; i++) h_pi0_onblock[i]->Write();
