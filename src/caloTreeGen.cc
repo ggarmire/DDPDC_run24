@@ -66,6 +66,7 @@ int caloTreeGen::Init(PHCompositeNode *topNode)
 {
   
   out = new TFile(Outfile.c_str(),"RECREATE");
+  ncount = 0;
   h_etaTow = new TH1F("h_etaTow", "eta", 8*96, -0.5, 95.5);
   h_phiTow = new TH1F("h_phiTow", "phi", 16, -0.5, 1.5); 
   h_position = new TH2F("h_position", "Position of all clusters going into diphoton spectra ; Eta; Phi", 8*96, -0.5625, 95.4375, 16, -0.5, 1.5);
@@ -166,7 +167,7 @@ int caloTreeGen::process_event(PHCompositeNode *topNode)
         }
 
     for (const int &bit : trig_bits){
-        if ((bit == 10) or (bit ==12)) isminbias = bit;
+        if ((bit == 10) or (bit ==12)) isminbias = bit;//sets minbias tag to trig number, if minbias trigger fired 
     }
 
     //if (isminbias == 1) std::cout << "minbias, gl1_scaledvec (bits): " << bits.to_string() << std::endl;
@@ -242,16 +243,18 @@ const int nphibin = towergeom->get_phibins();
       RawClusterContainer::ConstIterator clusterIter2;
       for(clusterIter = clusterEnd.first; clusterIter != clusterEnd.second; clusterIter++)
 	{
+      //ncount++; // matches here 
 	  RawCluster *recoCluster = clusterIter -> second;
-      if (isminbias == 0) continue;
+      if (isminbias == 0) continue; // confirmed does work to filter events that are not minbias/dont meet vertex cuts
+      //std::cout<< "isminbias: " << isminbias << ", vertex: " << m_vertex << std::endl;
 
 	  CLHEP::Hep3Vector vertex(0,0,0);
-	  if(m_vertex != -9999)vertex.setZ(m_vertex);
-	  CLHEP::Hep3Vector E_vec_cluster = RawClusterUtility::GetECoreVec(*recoCluster, vertex);
-	  CLHEP::Hep3Vector E_vec_cluster_Full = RawClusterUtility::GetEVec(*recoCluster, vertex);
+	  if(m_vertex != -9999)vertex.setZ(m_vertex);       // redundant if statement 
+	  CLHEP::Hep3Vector E_vec_cluster = RawClusterUtility::GetECoreVec(*recoCluster, vertex);// ecore
+	  CLHEP::Hep3Vector E_vec_cluster_Full = RawClusterUtility::GetEVec(*recoCluster, vertex);//E
 
-	  float clusE = E_vec_cluster_Full.mag();
-	  float clusEcore = E_vec_cluster.mag();
+	  float clusE = E_vec_cluster.mag(); // THIS IS ECORE
+	  //float clusEcore = E_vec_cluster.mag();
 	  float clus_eta = E_vec_cluster.pseudoRapidity();
 	  float clus_phi = E_vec_cluster.phi();
 	  float clus_pt = E_vec_cluster.perp();
@@ -262,7 +265,7 @@ const int nphibin = towergeom->get_phibins();
 
       if (clusE < clus1min) continue;
       TLorentzVector photon1;
-      photon1.SetPtEtaPhiE(clus_pt, clus_eta, clus_phi, clusEcore);
+      photon1.SetPtEtaPhiE(clus_pt, clus_eta, clus_phi, clusE);
 
       std::vector<float> toweretas; 
       std::vector<float> towerphis; 
@@ -293,22 +296,23 @@ const int nphibin = towergeom->get_phibins();
       for (clusterIter2 = clusterEnd.first; clusterIter2 != clusterEnd.second; clusterIter2++) {
         if (clusterIter == clusterIter2) continue;
         if (sqrt(pow(m_vertex, 2)) > vertexcut)continue;
-        if (isminbias == 0)continue; 
+        if (isminbias == 0)continue;        // triple check ig  
         RawCluster* recoCluster2 = clusterIter2->second;
         CLHEP::Hep3Vector vertex2(0, 0, 0);
+	    if(m_vertex != -9999)vertex2.setZ(m_vertex);       // was missing before
         CLHEP::Hep3Vector E_vec_cluster2 = RawClusterUtility::GetECoreVec(*recoCluster2, vertex2);
-        float clus2E = E_vec_cluster2.mag();
+        float clus2E = E_vec_cluster2.mag(); // Ecore
         float clus2_eta = E_vec_cluster2.pseudoRapidity();
         float clus2_phi = E_vec_cluster2.phi();
         float clus2_pt = E_vec_cluster2.perp();
-        float clus2_chisq = recoCluster2->get_chi2();
+        float clus2_chi = recoCluster2->get_chi2();
         //if (clus2_chisq > 4) continue;
         if (std::max(clusE, clus2E) < clus1min) continue;
         if (std::min(clusE, clus2E) < clus2min) continue;
         TLorentzVector photon2;
         photon2.SetPtEtaPhiE(clus2_pt, clus2_eta, clus2_phi, clus2E);
-        float asym = sqrt(pow(clusEcore - clus2E, 2)) / (clusEcore + clus2E);
-        //if (asym > maxalpha) continue;
+        float asym = sqrt(pow(clusE - clus2E, 2)) / (clusE + clus2E);
+        if (asym > maxalpha) continue;      // not sure why this one was gone??? 
         TLorentzVector pi0 = photon1 + photon2;
         if (pi0.M() > 1) continue;
 
@@ -338,7 +342,7 @@ const int nphibin = towergeom->get_phibins();
 
         if (std::max(clusE, clus2E) < 0.5) continue;
         if (std::min(clusE, clus2E) < 0.5) continue;
-        float chi2max = std::max(clus_chi, clus2_chisq);
+        float chi2max = std::max(clus_chi, clus2_chi);
         if (chi2max > 4) continue;
         if (asym > 0.7) continue;
 
@@ -350,7 +354,9 @@ const int nphibin = towergeom->get_phibins();
         phibin1 = floor((8*(avgphi1+.5))); 
         phibin2 = floor((8*(avgphi2+.5)));
         etabin1 = floor((8*(avgeta1+.5)));
-        etabin2 = floor((8*(avgeta2+.5)));
+        etabin2 = floor((8*(avgeta2+.5)));      // verified binning, these are fine ! 
+
+       // std::cout<< "avgphi1: " << avgphi1 << " phibin1: " << phibin1 << " avgeta1: " << avgeta1 << " etabin1: " << etabin1 << std::endl;
 
         h_position->Fill(avgeta1, avgphi1);
         h_position->Fill(avgeta2, avgphi2);
@@ -359,6 +365,7 @@ const int nphibin = towergeom->get_phibins();
         h_pi0[phibin2]->Fill(etabin2, pi0.M());
         h_pi0_onblock[phibin1]->Fill(etabin1%16, pi0.M());
         h_pi0_onblock[phibin2]->Fill(etabin2%16, pi0.M());
+        ncount++;
 
         h_fullpi0->Fill(pi0.M());
         //std::cout<< pi0.M()<<std::endl;
@@ -405,6 +412,7 @@ int caloTreeGen::End(PHCompositeNode *topNode)
   h_fullpi0->Write();
   for (int i = 0; i < 16; i++) h_pi0[i]->Write();
   for (int i = 0; i < 16; i++) h_pi0_onblock[i]->Write();
+  std::cout << "ncount: "<< ncount << std::endl;
 
   //T -> Write();
   //zVertex -> Write();

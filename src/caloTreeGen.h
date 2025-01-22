@@ -206,6 +206,7 @@ class caloTreeGen : public SubsysReco
   int storeHCals = 1;
   int storeZDC = 1;
   int storeTrig = 1;
+  int ncount;
   
   std::string m_trigNode;
   std::string m_emcTowerNode;
